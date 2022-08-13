@@ -1,0 +1,164 @@
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
+#include <Servo.h>
+
+#define FAR_LEFT_SENSOR_PIN   4
+#define LEFT_SENSOR_PIN       3
+#define RIGHT_SENSOR_PIN      7
+#define FAR_RIGHT_SENSOR_PIN  6
+
+#define MOTOR_LEFT_IN1 8
+#define MOTOR_LEFT_IN2 9
+#define MOTOR_RIGHT_IN3 10
+#define MOTOR_RIGHT_IN4 11
+
+LiquidCrystal_I2C lcd(0x27,16,2);
+Servo hitServo;
+
+int farLeftSensorValue = 0;
+int leftSensorValue = 0;
+int rightSensorValue = 0;
+int farRightSensorValue = 0;
+
+void setup() {
+  hitServo.attach(1);
+  hitServo.write(0);
+  delay(250);
+  // put your setup code here, to run once:
+  pinMode(FAR_LEFT_SENSOR_PIN, INPUT);
+  pinMode(LEFT_SENSOR_PIN, INPUT);
+  pinMode(RIGHT_SENSOR_PIN, INPUT);
+  pinMode(FAR_RIGHT_SENSOR_PIN, INPUT);
+
+  pinMode(MOTOR_LEFT_IN1, OUTPUT);
+  pinMode(MOTOR_LEFT_IN2, OUTPUT);
+  pinMode(MOTOR_RIGHT_IN3, OUTPUT);
+  pinMode(MOTOR_RIGHT_IN4, OUTPUT);
+
+  digitalWrite(MOTOR_LEFT_IN1, LOW);
+  digitalWrite(MOTOR_LEFT_IN2, LOW);
+  digitalWrite(MOTOR_RIGHT_IN3, LOW);
+  digitalWrite(MOTOR_RIGHT_IN4, LOW);
+
+  lcd.init();                      
+  lcd.init();
+  lcd.clear();
+  lcd.backlight();
+  lcd.setCursor(0,0);
+  lcd.print(" Robot Started!");
+  delay(1000);
+  displaySensor();
+}
+
+void readAllSensor() {
+  farLeftSensorValue = digitalRead(FAR_LEFT_SENSOR_PIN);
+  leftSensorValue = digitalRead(LEFT_SENSOR_PIN);
+  rightSensorValue = digitalRead(RIGHT_SENSOR_PIN);
+  farRightSensorValue = digitalRead(FAR_RIGHT_SENSOR_PIN);
+}
+
+void displaySensor() {
+  readAllSensor();
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print(" Sensor Display");
+  lcd.setCursor(0,1);
+  lcd.print(farLeftSensorValue);
+  lcd.setCursor(5,1);
+  lcd.print(leftSensorValue);
+  lcd.setCursor(10,1);
+  lcd.print(rightSensorValue);
+  lcd.setCursor(15,1);
+  lcd.print(farRightSensorValue);
+  delay(10);
+
+}
+void motorStopAll() {
+  digitalWrite(MOTOR_LEFT_IN1, LOW);
+  digitalWrite(MOTOR_LEFT_IN2, LOW);
+  digitalWrite(MOTOR_RIGHT_IN3, LOW);
+  digitalWrite(MOTOR_RIGHT_IN4, LOW);
+}
+
+void forward(int delay_time) {
+  digitalWrite(MOTOR_LEFT_IN1, LOW);
+  digitalWrite(MOTOR_LEFT_IN2, HIGH);
+  digitalWrite(MOTOR_RIGHT_IN3, HIGH);
+  digitalWrite(MOTOR_RIGHT_IN4, LOW);
+  delay(delay_time);
+  //motorStopAll();
+}
+
+void backward(int delay_time) {
+  digitalWrite(MOTOR_LEFT_IN1, HIGH);
+  digitalWrite(MOTOR_LEFT_IN2, LOW);
+  digitalWrite(MOTOR_RIGHT_IN3, LOW);
+  digitalWrite(MOTOR_RIGHT_IN4, HIGH);
+  delay(delay_time);
+  //motorStopAll();
+}
+
+void turnLeft(int delay_time) {
+  digitalWrite(MOTOR_LEFT_IN1, LOW);
+  digitalWrite(MOTOR_LEFT_IN2, LOW);
+  digitalWrite(MOTOR_RIGHT_IN3, HIGH);
+  digitalWrite(MOTOR_RIGHT_IN4, LOW);
+  delay(delay_time);
+  //motorStopAll();
+}
+
+void turnRight(int delay_time) {
+  digitalWrite(MOTOR_LEFT_IN1, LOW);
+  digitalWrite(MOTOR_LEFT_IN2, HIGH);
+  digitalWrite(MOTOR_RIGHT_IN3, LOW);
+  digitalWrite(MOTOR_RIGHT_IN4, LOW);
+  delay(delay_time);
+  //motorStopAll();
+}
+
+void spinLeft(int delay_time) {
+  digitalWrite(MOTOR_LEFT_IN1, HIGH);
+  digitalWrite(MOTOR_LEFT_IN2, LOW);
+  digitalWrite(MOTOR_RIGHT_IN3, HIGH);
+  digitalWrite(MOTOR_RIGHT_IN4, LOW);
+  delay(delay_time);
+  //motorStopAll();
+}
+
+void spinRight(int delay_time) {
+  digitalWrite(MOTOR_LEFT_IN1, LOW);
+  digitalWrite(MOTOR_LEFT_IN2, HIGH);
+  digitalWrite(MOTOR_RIGHT_IN3, LOW);
+  digitalWrite(MOTOR_RIGHT_IN4, HIGH);
+  delay(delay_time);
+  //motorStopAll();
+
+}
+
+int track() {
+  displaySensor();
+  int delay_time = 50;
+  if((leftSensorValue == 0) && (rightSensorValue == 0)) {
+    forward(delay_time);
+  } else  if((leftSensorValue == 0) && (rightSensorValue == 1)) {
+    turnRight(delay_time);
+  } else  if((leftSensorValue == 1) && (rightSensorValue == 0)) {
+    turnLeft(delay_time);
+  } else {
+    motorStopAll();
+    return 0;
+  }
+  return 1;
+}
+
+void loop() {
+  hitServo.write(150);
+  delay(500);
+  hitServo.write(0);
+  delay(600);
+  //while(track());
+  //forward(602);
+  //motorStopAll();
+  //spinRight(700);
+  
+} 
